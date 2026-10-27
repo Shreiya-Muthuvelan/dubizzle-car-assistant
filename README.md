@@ -72,7 +72,7 @@ uv sync --locked
 Create a `.env` file in the project root:
 
 ```dotenv
-GOOGLE_API_KEY=your_gemini_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 Obtain your key from [Google AI Studio](https://aistudio.google.com/).
