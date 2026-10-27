@@ -43,7 +43,7 @@ Gemini service failures are handled with user-friendly error messages rather tha
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/Shreiya-Muthuvelan/dubizzle-car-assistant.git
 cd dubizzle-car-assistant
 ```
 
