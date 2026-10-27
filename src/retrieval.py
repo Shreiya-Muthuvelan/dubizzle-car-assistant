@@ -1,15 +1,6 @@
 from pathlib import Path
 import pandas as pd
 
-"""
-some design choice used here-
-* make and model filtering is case-insensitive
-* initial text search uses exact substring matching
-* listing id is only an internal identifier
-
-
-"""
-
 data_file=Path("data/car_listings_cleaned.csv")
 
 def load_listings() -> pd.DataFrame:
