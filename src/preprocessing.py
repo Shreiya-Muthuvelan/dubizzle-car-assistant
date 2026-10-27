@@ -1,17 +1,19 @@
 """
-We will use this text to first clean the text and then extract uesful attributes using python regex matching
 
-No LLM has been involved in this as :
+Preprocess raw car listings using text cleaning and rule-based attribute extraction.
 
- * dataset has only 100 listings
- * regex is sufficient for many predictable formats
- * it avoids unecessary API calls and potenial hallucinations
+Regex-based extraction is used instead of an LLM because the dataset contains only
+100 listings, many attributes follow predictable formats, and deterministic rules
+avoid unnecessary API calls and reduce the risk of hallucinated values.
 
-Functions that we will be doing in this script
-* clean HTML from descriptions
-* deduplicate record that have matching title+description pairs
-* extract stated selling price, monthly payment amounts, mileage etc
-* save the preprocessed dataset
+This module provides functions to:
+
+* Remove HTML markup from listing descriptions.
+* Deduplicate listings with matching title and description pairs.
+* Extract stated selling prices, monthly payment amounts, mileage, and other
+  relevant attributes using regular expressions.
+* Save the cleaned and enriched dataset for downstream retrieval.
+
 """
 import pandas as pd
 import re
