@@ -32,6 +32,20 @@ Listing embeddings are cached locally. The application checks the embedding mode
 
 Gemini service failures are handled with user-friendly error messages rather than exposing raw service errors. However, natural-language filter extraction and response generation still depend on Gemini being available.
 
+## Screenshots
+
+### Multi-turn Vehicle Search
+
+The assistant supports conversational search refinement, allowing users to narrow down vehicle listings through follow-up requests while retaining previously established preferences.
+
+|                    Initial Search                    |                       Follow-up Query                       |
+| :--------------------------------------------------: | :---------------------------------------------------------: |
+| ![Multi-turn search 1](screenshots/multi_turn_1.png) |     ![Multi-turn search 2](screenshots/multi_turn_2.png)    |
+|                                                      |                                                             |
+| ![Multi-turn search 3](screenshots/multi_turn_3.png) |     ![Multi-turn search 4](screenshots/multi_turn_4.png)    |
+|                                                      |                                                              |
+
+
 ## Setup
 
 ### Prerequisites
