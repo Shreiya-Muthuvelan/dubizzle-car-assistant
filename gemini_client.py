@@ -1,18 +1,4 @@
 
-"""
-Design choices :
-* we are using pydantic as we need a proper strcuture for our python code 
-* selling price and monthly payment are kept different since they are different constraints
-* we use two gemini calls one to interpret the user's request and second to produce a readable answer
-from the retrieved results. keeping them seperates helps in debugging
-
-* rn the extraction function only handles car search messages, we need to extend it to intent handling for greetings, 
-general automotive questions, booking requests, 
-and lead qualification as we build those capabilities.
-
-"""
-
-
 import json
 import os
 from typing import Optional
