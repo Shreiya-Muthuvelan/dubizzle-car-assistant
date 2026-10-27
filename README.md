@@ -40,9 +40,9 @@ The assistant supports conversational search refinement, allowing users to narro
 
 |                    Initial Search                    |                       Follow-up Query                       |
 | :--------------------------------------------------: | :---------------------------------------------------------: |
-| ![Multi-turn search 1](screenshots/multi_turn_1.png) |     ![Multi-turn search 2](screenshots/multi_turn_2.png)    |
+| ![Multi-turn search 1](screenshots/multi_turn_1.png) |     ![Multi-turn search 2](screenshots/multi_turn_3.png)    |
 |                                                      |                                                             |
-| ![Multi-turn search 3](screenshots/multi_turn_3.png) |     ![Multi-turn search 4](screenshots/multi_turn_4.png)    |
+| ![Multi-turn search 2](screenshots/multi_turn_2.png) |     ![Multi-turn search 4](screenshots/multi_turn_4.png)    |
 |                                                      |                                                              |
 
 
