@@ -13,7 +13,7 @@ def looks_like_booking_request(message: str) -> bool:
 
     text = message.lower()
 
-    booking_phrases = ["book", "booking", "view","viewing", "arrange a viewing", "schedule a viewing", "test drive",)
+    booking_phrases = ["book", "booking", "view","viewing", "arrange a viewing", "schedule a viewing", "test drive",]
 
     return any(phrase in text for phrase in booking_phrases)
 

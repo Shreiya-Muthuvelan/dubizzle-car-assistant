@@ -347,7 +347,7 @@ def process_booking_message( conversation_id: str,message: str,
     session = booking_sessions.get(conversation_id)
   
     # Allow the user to start a new car search during an unfinished booking.
-    if ( session is not Noneand not session.get("saved") and is_new_search_during_booking(message)):
+    if ( session is not None and not session.get("saved") and is_new_search_during_booking(message)):
         booking_sessions.pop(conversation_id, None)
         print( "User started a new car search. Cleared the unfinished booking session.")
         return None

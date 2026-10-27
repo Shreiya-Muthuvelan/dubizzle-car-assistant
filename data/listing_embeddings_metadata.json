@@ -1,6 +1,6 @@
 {
   "model_name": "sentence-transformers/all-MiniLM-L6-v2",
-  "dataset_fingerprint": "fb13a7d7e5af5e9001a09d0f29fcbcf9066ea3e91e02c2b36259bc52111f462c",
+  "dataset_fingerprint": "e2be851b0b4dbd01ae22e73a8a4cd8cf25e49c3fb93c511cc84261c839bd9c4d",
   "listing_ids": [
     "0",
     "1",
