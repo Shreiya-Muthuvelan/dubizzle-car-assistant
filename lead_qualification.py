@@ -1,16 +1,4 @@
-"""
-What we are trying to implement here is when user says something like "
-im interested in buying one of these cars" then assistant can ask for name and 
-contact details and store that information , and then saves the completed lead in data/leads
 
-note: we shouldnt ask for users preferred car again if those details are there in conversation memory
-
-three main things :
-* reuse existing search information, update_lead_from_filter() takes fitlers that are already extracted by car search system
-* asks for missing information one question at a time using get_missing_fields() function
-* saves qualified leads to csv
-
-"""
 import csv
 import re
 
