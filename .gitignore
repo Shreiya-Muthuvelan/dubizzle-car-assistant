@@ -12,17 +12,17 @@ env/
 __pycache__/
 *.py[cod]
 
-# Test artifacts
+# Testing
 .pytest_cache/
 .pytest_tmp/
 .coverage
 htmlcov/
 
-# IDE and editor files
+# IDE files
 .vscode/
 .idea/
 
-# Operating system files
+# OS files
 .DS_Store
 Thumbs.db
 
