@@ -26,14 +26,12 @@ def get_dataset_fingerprint(df):
     """Create a fingerprint of the text used to generate embeddings."""
     semantic_text = build_semantic_text(df)
     combined_text = "\n".join(semantic_text.tolist())
-
     return hashlib.sha256(combined_text.encode("utf-8")).hexdigest()
 
 
 def build_or_load_embeddings():
     """Load cached embeddings or generate and save them."""
     df = load_listings()
-
     semantic_text = build_semantic_text(df)
     fingerprint = get_dataset_fingerprint(df)
 
@@ -43,8 +41,7 @@ def build_or_load_embeddings():
         with open(metadata_file, "r", encoding="utf-8") as file:
             metadata = json.load(file)
 
-        cache_is_valid = (metadata.get("model_name") == model_name
-            and metadata.get("dataset_fingerprint") == fingerprint
+        cache_is_valid = (metadata.get("model_name") == model_name and metadata.get("dataset_fingerprint") == fingerprint
             and metadata.get("listing_ids") == df["listing_id"].tolist())
 
         if cache_is_valid:
@@ -59,11 +56,7 @@ def build_or_load_embeddings():
 
     np.save(embeddings_file, embeddings)
 
-    metadata = {
-        "model_name": model_name,
-        "dataset_fingerprint": fingerprint,
-        "listing_ids": df["listing_id"].tolist(),
-    }
+    metadata = { "model_name": model_name,"dataset_fingerprint": fingerprint,"listing_ids": df["listing_id"].tolist(),}
 
     with open(metadata_file, "w", encoding="utf-8") as file:
         json.dump(metadata, file, indent=2)
@@ -72,7 +65,6 @@ def build_or_load_embeddings():
     return df, embeddings
 
 listings,listing_embeddings = build_or_load_embeddings()
-
 
 def semantic_search(query, top_k=10):
     """Rank listings by semantic similarity."""
