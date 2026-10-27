@@ -230,59 +230,50 @@ User message:
 
 
 def format_listings_response(listings: list[dict]) -> str:
-    """Generate a readable response from retrieved listings without Gemini."""
+    """Create a concise vehicle summary without raw listing descriptions."""
 
     if not listings:
         return (
-            "I couldn't find any matching vehicles. "
-            "Try adjusting your search criteria."
+            "I couldn't find any matching listings with the available "
+            "information. You could try adjusting your budget, year range, "
+            "or other requirements."
         )
 
-    lines = [
-        f"I found {len(listings)} matching vehicle listing(s):"
-    ]
+    lines = [f"I found {len(listings)} matching vehicle(s):"]
 
-    for index, car in enumerate(listings, start=1):
-        make = car.get("make") or "Unknown make"
-        model = car.get("model") or "Unknown model"
-        listing_id = car.get("listing_id", "Not specified")
+    for listing in listings:
+        make = listing.get("make") or ""
+        model = listing.get("model") or ""
+        trim = listing.get("trim") or ""
+        year = listing.get("year")
+        price = listing.get("price_aed")
+        listing_id = listing.get("listing_id")
 
-        lines.extend([
-            "",
-            f"**{index}. {make} {model}**",
-            f"- Listing ID: {listing_id}",
-        ])
+        vehicle_name = " ".join(
+            str(value).strip()
+            for value in [make, model, trim]
+            if str(value).strip()
+        )
 
-        year = car.get("year")
-        if pd.notna(year):
-            lines.append(f"- Year: {year}")
+        if year is not None:
+            vehicle_name = f"{vehicle_name} ({year})".strip()
 
-        trim = car.get("trim")
-        if trim and pd.notna(trim):
-            lines.append(f"- Trim: {trim}")
+        if not vehicle_name:
+            vehicle_name = "Vehicle"
 
-        price = car.get("price_aed")
-        if pd.notna(price):
-            lines.append(f"- Selling price: AED {float(price):,.0f}")
+        details = [vehicle_name]
 
-        monthly_payment = car.get("monthly_payment_aed")
-        if pd.notna(monthly_payment):
-            lines.append(
-                f"- Monthly payment: AED {float(monthly_payment):,.0f}"
-            )
+        if price is not None:
+            details.append(f"AED {price}")
 
-        mileage = car.get("mileage_km")
-        if pd.notna(mileage):
-            lines.append(f"- Mileage: {float(mileage):,.0f} km")
+        if listing_id is not None:
+            details.append(f"Listing ID: {listing_id}")
 
-        description = car.get("clean_description") or car.get("description")
-        if description and pd.notna(description):
-            lines.append(f"- Description: {description}")
+        lines.append("- " + " — ".join(details))
 
-    lines.extend([
-        "",
-        "Would you like more details about any of these vehicles?",
-    ])
+    lines.append(
+        "\nWould you like more details about any of these vehicles?"
+    )
 
     return "\n".join(lines)
 
@@ -313,19 +304,24 @@ You are a helpful automotive marketplace assistant for the UAE.
 Answer the user's request using ONLY the supplied vehicle listings.
 
 Rules:
+
 1. Never invent a vehicle, price, year, mileage, or payment amount.
 2. Treat null values as unknown, not zero.
-3. Do not claim that a vehicle meets a requirement unless the
-   supplied listing data supports that claim.
-4. If a field is unknown, say it is not available in the listing.
+3. Do not claim that a vehicle meets a requirement unless the supplied listing data supports that claim.
+4. If a field is unknown, say it is not available in the listing when the user specifically asks about it.
 5. Recommend relevant vehicles and briefly explain why they match.
-6. Mention the selling price and mileage when available.
-7. Do not claim a vehicle is available for purchase unless the
-   listing data explicitly establishes its availability.
+6. Mention the selling price when available. Mention mileage only when relevant to the user's request.
+7. Do not claim a vehicle is available for purchase unless the listing data explicitly establishes its availability.
 8. If no listings were supplied, do not recommend any vehicles.
-9. If a structured field is missing but the listing description
-   explicitly provides that information, you may report the value
-   while clearly attributing it to the description.
+9. If a structured field is missing but the listing description explicitly provides that information, you may report the value while clearly attributing it to the description.
+10. Keep the response concise and easy to scan.
+11. NEVER reproduce raw listing descriptions or long blocks of vehicle specifications in the response.
+12. The frontend displays matching vehicles separately as structured vehicle cards. Do not duplicate all their details in the chat message.
+13. Briefly state how many matching vehicles were found and summarize the strongest matches using their make, model, year, and price when available.
+14. Identify vehicles using their listing ID when available.
+15. Answer specific follow-up questions using the supplied listing data, including details found in descriptions when relevant.
+16. Never invent information that is not available in the supplied listings.
+
 User message:
 {message}
 
@@ -335,8 +331,8 @@ Extracted search requirements:
 Retrieved listings:
 {json.dumps(safe_listings, ensure_ascii=False, default=str)}
 
-Provide a concise, natural response. When recommending a vehicle,
-identify it using its listing ID when one is available.
+Provide a concise, natural response. For a search request, briefly summarize the matching vehicles without reproducing their full descriptions or specifications.
+
 """
 
     try:
