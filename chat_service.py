@@ -4,6 +4,8 @@ from src.hybrid_retrieval import hybrid_search
 from lead_qualification import process_lead_message
 from conversation_memory import (get_or_create_conversation,merge_search_filters,update_conversation)
 import time
+import pandas as pd
+import re
 from booking_service import process_booking_message
 
 def looks_like_booking_request(message: str) -> bool:
@@ -11,15 +13,7 @@ def looks_like_booking_request(message: str) -> bool:
 
     text = message.lower()
 
-    booking_phrases = (
-    "book",
-    "booking",
-    "view",
-    "viewing",
-    "arrange a viewing",
-    "schedule a viewing",
-    "test drive",
-)
+    booking_phrases = ["book", "booking", "view","viewing", "arrange a viewing", "schedule a viewing", "test drive",)
 
     return any(phrase in text for phrase in booking_phrases)
 
@@ -27,17 +21,7 @@ def is_greeting(message: str) -> bool:
     """Identify simple greetings without calling Gemini."""
 
     text = message.lower().strip()
-    greetings = {
-        "hi",
-        "hello",
-        "hey",
-        "hi there",
-        "hello there",
-        "good morning",
-        "good afternoon",
-        "good evening",
-        "hey there",
-    }
+    greetings = { "hi", "hello", "hey", "hi there","hello there", "good morning", "good afternoon", "good evening","hey there",}
 
     return text in greetings
 def is_out_of_scope(message: str) -> bool:
@@ -45,42 +29,20 @@ def is_out_of_scope(message: str) -> bool:
 
     text = message.lower().strip()
 
-    out_of_scope_phrases = (
-        "write me a poem",
-        "write a poem",
-        "solve this math",
-        "solve this equation",
-        "help me with my homework",
-        "help with my homework",
-        "calculus assignment",
-        "calculus homework",
-        "help me with calculus",
-        "math assignment",
-        "math homework",
-        "solve this calculus problem",
-        "debug my code",
-        "write python code",
-        "write me a story",
-        "tell me a joke",
-        "what is the weather",
-        "who is the president",
-    )
+    out_of_scope_phrases = (  "write me a poem","write a poem","solve this math","solve this equation", 
+        "help me with my homework","help with my homework","calculus assignment","calculus homework",
+        "help me with calculus","math assignment","math homework","solve this calculus problem",
+        "debug my code","write python code","write me a story","tell me a joke",
+        "what is the weather","who is the president",)
 
     return any(phrase in text for phrase in out_of_scope_phrases)
 
-import pandas as pd
-import re
-
 DATA_PATH = "data/car_listings_cleaned.csv"
-
 
 def mentions_known_vehicle(message: str) -> bool:
     """Check whether a message explicitly mentions a make or model in our dataset."""
-
     df = pd.read_csv(DATA_PATH)
-
     text = message.lower()
-
     vehicle_terms = set()
 
     for column in ["make", "model", "trim"]:
@@ -102,10 +64,7 @@ def mentions_known_vehicle(message: str) -> bool:
 
     return False
 
-def answer_vehicle_followup(
-    message: str,
-    listings: list[dict]
-) -> str | None:
+def answer_vehicle_followup(message: str,listings: list[dict]) -> str | None:
 
     # Explicit vehicle mentions should go through normal retrieval.
     if mentions_known_vehicle(message):
@@ -115,40 +74,13 @@ def answer_vehicle_followup(
 
     # If the user names a specific make/model, let normal retrieval
     # identify the correct listing instead of using the previous results.
-    explicit_vehicle_phrases = (
-        "bmw",
-        "toyota",
-        "nissan",
-        "mercedes",
-        "mercedes-benz",
-        "audi",
-        "honda",
-        "hyundai",
-        "kia",
-        "ford",
-        "lexus",
-        "mitsubishi",
-        "mazda",
-        "volkswagen",
-        "porsche",
-        "land rover",
-        "range rover",
-        "tesla",
-        "chevrolet",
-        "jeep",
-        "volvo",
-        "corolla",
-        "camry",
-        "civic",
-        "accord",
-        "3 series",
-        "5 series",
-        "7 series",
-        "x3",
-        "x5",
-        "m3",
-        "m5",
-    )
+    explicit_vehicle_phrases = ( "bmw", "toyota","nissan", "mercedes",
+        "mercedes-benz","audi", "honda", "hyundai",
+        "kia","ford","lexus","mitsubishi",
+        "mazda","volkswagen","porsche","land rover", "range rover",
+        "tesla", "chevrolet", "jeep", "volvo","corolla",
+        "camry","civic","accord","3 series","5 series","7 series",
+        "x3", "x5", "m3", "m5",)
 
     if any(phrase in text for phrase in explicit_vehicle_phrases):
         return None
@@ -156,33 +88,14 @@ def answer_vehicle_followup(
     # These phrases indicate a reference to a previously displayed vehicle.
     references_previous_car = any(
         phrase in text
-        for phrase in (
-            "this car",
-            "that car",
-            "this vehicle",
-            "that vehicle",
-            "this listing",
-            "that listing",
-            "its price",
-            "it's price",
-            "its mileage",
-            "its year",
-            "its monthly payment",
-            "what year is it",
-            "what year is this",
-            "what is its year",
-            "how much is it",
-            "how much does it cost",
-            "what is the price",
-            "what is the mileage",
-            "what is the monthly payment",
-            "what is its mileage",
-            "what is its monthly payment",
-            "tell me more",
-            "more details",
-            "describe this car",
-        )
-    )
+        for phrase in ( "this car","that car", "this vehicle", "that vehicle",
+            "this listing", "that listing",
+            "its price", "it's price", "its mileage", "its year",
+            "its monthly payment","what year is it","what year is this","what is its year",
+            "how much is it","how much does it cost",
+            "what is the price","what is the mileage","what is the monthly payment",
+            "what is its mileage", "what is its monthly payment","tell me more",
+            "more details","describe this car",)  )
 
     if not references_previous_car or not listings:
         return None
@@ -198,15 +111,12 @@ def answer_vehicle_followup(
         if price is None:
             return "The selling price isn't available in this listing."
 
-        return (
-            f"The selling price of the {car.get('make', '')} "
-            f"{car.get('model', '')} is AED {float(price):,.0f}."
-        )
+        return ( f"The selling price of the {car.get('make', '')} "
+            f"{car.get('model', '')} is AED {float(price):,.0f}.")
 
     # Monthly payment.
     if any(word in text for word in ("monthly payment", "installment", "instalment")):
         payment = car.get("monthly_payment_aed")
-
         if payment is None:
             return "The monthly payment isn't available in this listing."
 
@@ -215,14 +125,10 @@ def answer_vehicle_followup(
     # Mileage.
     if any(word in text for word in ("mileage", "kilomet", "kilometer")):
         mileage = car.get("mileage_km")
-
         if mileage is None:
             return "The mileage isn't available in this listing."
 
-        return (
-            f"The listed mileage of the {car.get('make', '')} "
-            f"{car.get('model', '')} is {float(mileage):,.0f} km."
-        )
+        return ( f"The listed mileage of the {car.get('make', '')} " f"{car.get('model', '')} is {float(mileage):,.0f} km." )
 
     # Manufacturing year.
     if "year" in text or "old is" in text:
@@ -231,10 +137,8 @@ def answer_vehicle_followup(
         if year is None:
             return "The manufacturing year isn't available in this listing."
 
-        return (
-            f"The listed manufacturing year of the "
-            f"{car.get('make', '')} {car.get('model', '')} is {year}."
-        )
+        return ( f"The listed manufacturing year of the "
+                f"{car.get('make', '')} {car.get('model', '')} is {year}."  )
 
     # Trim.
     if "trim" in text or "variant" in text:
@@ -248,28 +152,20 @@ def answer_vehicle_followup(
     # General details.
     if any(
         phrase in text
-        for phrase in (
-            "more details",
-            "tell me more",
+        for phrase in ("more details","tell me more",
             "describe this",
             "description",
-            "what features",
-        )
-    ):
+            "what features", ) ):
         description = car.get("description")
 
         if description:
-            return (
-                f"Here are the details for the "
-                f"{car.get('make', '')} {car.get('model', '')}: "
-                f"{description}"
-            )
+            return ( f"Here are the details for the "
+                    f"{car.get('make', '')} {car.get('model', '')}: "
+                f"{description}" )
 
         return "This listing doesn't provide an additional vehicle description."
 
     return None
-
-
 
 
 def chat(message: str, top_k: int = 5,conversation_id:str | None=None) -> dict:
@@ -279,145 +175,84 @@ def chat(message: str, top_k: int = 5,conversation_id:str | None=None) -> dict:
     conversation_id,state=get_or_create_conversation(conversation_id)
         # Handle active booking conversations before extracting car-search filters.
     if is_greeting(message):
-        answer = (
-            "Hi! I'm your automotive assistant. I can help you find cars, "
+        answer = ("Hi! I'm your automotive assistant. I can help you find cars, "
             "compare listings, check available vehicle details, and arrange "
-            "a viewing. What are you looking for?"
-        )
+            "a viewing. What are you looking for?")
 
-        update_conversation(
-            conversation_id=conversation_id,
-            user_message=message,
-            assistant_message=answer,
-            search_filters=state["search_filters"],
-        )
+        update_conversation( conversation_id=conversation_id, user_message=message,
+            assistant_message=answer, search_filters=state["search_filters"],  )
 
         return {
-            "conversation_id": conversation_id,
-            "message": message,
-            "filters": state["search_filters"],
-            "count": 0,
-            "results": [],
-            "answer": answer,
-            "lead": None,
-            "booking": None,
-        }
+            "conversation_id": conversation_id,"message": message,
+            "filters": state["search_filters"], "count": 0,
+            "results": [], "answer": answer,
+            "lead": None,"booking": None,}
     if is_out_of_scope(message):
-        answer = (
-            "I'm here to help with cars and automotive-related questions. "
+        answer = ("I'm here to help with cars and automotive-related questions. "
             "I can help you find vehicles, compare listings, understand "
             "vehicle details, and arrange a viewing. What would you like "
-            "to know about a car?"
-        )
+            "to know about a car?" )
 
-        update_conversation(
-            conversation_id=conversation_id,
-            user_message=message,
-            assistant_message=answer,
-            search_filters=state["search_filters"],
-        )
+        update_conversation( conversation_id=conversation_id,user_message=message,
+            assistant_message=answer, search_filters=state["search_filters"], )
 
         return {
-            "conversation_id": conversation_id,
-            "message": message,
-            "filters": state["search_filters"],
-            "count": 0,
-            "results": [],
-            "answer": answer,
-            "lead": None,
-            "booking": None,
-        }
+            "conversation_id": conversation_id, "message": message,
+            "filters": state["search_filters"], "count": 0,
+            "results": [],"answer": answer,"lead": None, "booking": None, }
     # Handle simple follow-up questions about previously retrieved vehicles.
     previous_listings = state.get("last_listings", [])
 
-    followup_answer = answer_vehicle_followup(
-        message=message,
-        listings=previous_listings,
-    )
+    followup_answer = answer_vehicle_followup(message=message,listings=previous_listings, )
 
     if followup_answer is not None:
-        update_conversation(
-            conversation_id=conversation_id,
-            user_message=message,
-            assistant_message=followup_answer,
-            search_filters=state["search_filters"],
-        )
+        update_conversation(conversation_id=conversation_id,
+            user_message=message,assistant_message=followup_answer,search_filters=state["search_filters"],)
 
       
-        return {
-    "conversation_id": conversation_id,
-    "message": message,
-    "filters": state["search_filters"],
-    "count": 0,
-    "results": [],
-    "answer": followup_answer,
-    "lead": None,
-    "booking": None,}
+        return {"conversation_id": conversation_id,
+    "message": message,"filters": state["search_filters"],
+    "count": 0,"results": [],"answer": followup_answer,"lead": None,"booking": None,}
 
 
     from booking_service import booking_sessions
 
     if conversation_id in booking_sessions:
-        booking_result = process_booking_message(
-            conversation_id=conversation_id,
-            message=message,
-        )
+        booking_result = process_booking_message( conversation_id=conversation_id,message=message, )
 
         if booking_result is not None:
             answer = booking_result["message"]
 
-            update_conversation(
-                conversation_id=conversation_id,
-                user_message=message,
-                assistant_message=answer,
-                search_filters=state["search_filters"],
-            )
+            update_conversation( conversation_id=conversation_id,user_message=message,
+                assistant_message=answer, search_filters=state["search_filters"], )
 
             return {
                 "conversation_id": conversation_id,
-                "message": message,
-                "filters": state["search_filters"],
-                "count": 0,
-                "results": [],
-                "answer": answer,
-                "lead": None,
+                "message": message, "filters": state["search_filters"],
+                "count": 0,"results": [],
+                "answer": answer,"lead": None,
                 "booking": {
                     "status": booking_result["status"],
                     "booking_id": booking_result.get("booking_id")
-                    or booking_result.get("booking", {}).get("booking_id"),
-                },
-            }
+                    or booking_result.get("booking", {}).get("booking_id"),  },}
         # Handle explicit new booking requests before car-search extraction.
     if looks_like_booking_request(message):
-        booking_result = process_booking_message(
-            conversation_id=conversation_id,
-            message=message,
-        )
+        booking_result = process_booking_message(conversation_id=conversation_id, message=message,)
 
         if booking_result is not None:
             answer = booking_result["message"]
 
-            update_conversation(
-                conversation_id=conversation_id,
-                user_message=message,
-                assistant_message=answer,
-                search_filters=state["search_filters"],
-            )
+            update_conversation( conversation_id=conversation_id, user_message=message,
+                assistant_message=answer, search_filters=state["search_filters"], )
 
             return {
-                "conversation_id": conversation_id,
-                "message": message,
-                "filters": state["search_filters"],
-                "count": 0,
-                "results": [],
-                "answer": answer,
-                "lead": None,
-                "booking": {
+                "conversation_id": conversation_id,"message": message,
+                "filters": state["search_filters"], "count": 0,
+                "results": [],"answer": answer,
+                "lead": None,"booking": {
                     "status": booking_result["status"],
                     "booking_id": booking_result.get("booking_id")
-                    or booking_result.get("booking", {}).get("booking_id"),
-                },
-            }
+                    or booking_result.get("booking", {}).get("booking_id"),  }, }
     total_start=time.perf_counter()
 
     print("Extracting search filters with Gemini")
@@ -428,28 +263,16 @@ def chat(message: str, top_k: int = 5,conversation_id:str | None=None) -> dict:
     except Exception as exc:
         print(f"Gemini filter extraction failed: {exc}")
 
-        answer = (
-            "I'm temporarily unable to process your request because my "
-            "AI service is unavailable. Please try again shortly."
-        )
+        answer = ( "I'm temporarily unable to process your request because my "
+            "AI service is unavailable. Please try again shortly." )
 
-        update_conversation(
-            conversation_id=conversation_id,
-            user_message=message,
-            assistant_message=answer,
-            search_filters=state["search_filters"],
-        )
+        update_conversation( conversation_id=conversation_id,user_message=message,assistant_message=answer,
+            search_filters=state["search_filters"],)
 
-        return {
-            "conversation_id": conversation_id,
-            "message": message,
-            "filters": state["search_filters"],
-            "count": 0,
-            "results": [],
-            "answer": answer,
-            "lead": None,
-            "booking": None,
-        }
+        return {"conversation_id": conversation_id, "message": message,
+            "filters": state["search_filters"],"count": 0,
+            "results": [],"answer": answer,
+            "lead": None,"booking": None,}
 
     print(f"Filter extraction took {time.perf_counter() - start:.2f}")
     print("Extracted filters")
@@ -501,18 +324,12 @@ def chat(message: str, top_k: int = 5,conversation_id:str | None=None) -> dict:
     start = time.perf_counter()
 
     try:
-        answer = generate_car_response(
-            message=message,
-            filters=filters,
-            listings=listings,
-        )
+        answer = generate_car_response( message=message,filters=filters,listings=listings, )
     except Exception as exc:
         print(f"Gemini response generation failed: {exc}")
 
-        answer = (
-            "I found the matching vehicle listings, but I'm temporarily "
-            "unable to generate a response. Please try again shortly."
-        )
+        answer = ("I found the matching vehicle listings, but I'm temporarily "
+            "unable to generate a response. Please try again shortly." )
 
     print(f"Answer generation took {time.perf_counter() - start:.2f}")
     update_conversation(conversation_id=conversation_id,user_message=message,
@@ -525,12 +342,8 @@ def chat(message: str, top_k: int = 5,conversation_id:str | None=None) -> dict:
     print("Returning API response")
   
     return {
-    "conversation_id": conversation_id,
-    "message": message,
-    "filters": filters.model_dump(),
-    "count": len(listings),
-    "results": listings,
-    "answer": answer,
-    "lead":None,
-}
+    "conversation_id": conversation_id,"message": message,
+    "filters": filters.model_dump(),"count": len(listings),
+    "results": listings, "answer": answer,
+    "lead":None,}
 
